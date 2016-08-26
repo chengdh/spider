@@ -1,0 +1,10 @@
+#source 'http://rubygems.org'
+source 'https://ruby.taobao.org/'
+
+ruby '2.1.4'
+gem 'httpclient', '~> 2.8'
+gem 'mechanize', '~> 2.7', '>= 2.7.4'
+gem 'nokogiri', '~> 1.6', '>= 1.6.8'
+gem 'activerecord', '~> 4.2', '>= 4.2.7.1'
+gem 'mysql2', '~> 0.4.4'
+gem 'selenium-webdriver', '~> 2.53', '>= 2.53.4'
