@@ -4,22 +4,26 @@ profile = Selenium::WebDriver::Chrome::Profile.new
 profile['download.prompt_for_download'] = false
 profile['download.default_directory'] = "/path/to/dir"
 driver = Selenium::WebDriver.for :chrome
-
 car_db_url = "http://db.auto.sohu.com/maint_list.shtml"
 driver.get car_db_url
 #获取不同品牌
 brand_page =  Nokogiri::HTML(driver.page_source)
 car_lists = brand_page.css(".carList .name a")
-car_lists.each do |c|
-  title_str = c['title']
-  p c['title']
-  p "------------------------------------------"
-  car_maint_page_url = "http://db.auto.sohu.com/#{c['href']}"
-  driver.get car_maint_page_url
+# car_lists.each do |c|
+  # title_str = c['title']
+  # p c['title']
+  # p "------------------------------------------"
+  #car_maint_page_url = "http://db.auto.sohu.com/#{c['href']}"
+  car_maint_page_url = "http://db.auto.sohu.com/model_3206/Maintenance.shtml"
+  begin
+    driver.get car_maint_page_url
+  rescue ex
+    p ex
+  end
   m_car_maint_page = Nokogiri::HTML(driver.page_source)
   #获取车款
   car_type = m_car_maint_page.at("#comtit strong a:first")
-  next unless car_type
+  # next unless car_type
   car_type_str = car_type.content
   p car_type.content
   p "------------------------------------------------"
@@ -36,24 +40,34 @@ car_lists.each do |c|
 
   #获取保养手册
   table = m_car_maint_page.at(".tabel1")
-  open("export/#{title_str}-#{car_type_str}-#{year_str}-#{ver_str}.html", 'w:UTF-8') do |f|
-    f << '<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>'
-    f.puts table.to_s
-    f << "</body></html>"
+  begin
+    open("export/#{title_str}-#{car_type_str}-#{year_str}-#{ver_str}.html", 'w:UTF-8') do |f|
+      f << '<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>'
+      f.puts table.to_s
+      f << "</body></html>"
+    end
+  rescue
   end
 
+
   #获取所有车款
-  all_types = m_car_maint_page.css(".top_list .on_sell a")
   links = m_car_maint_page.css(".top_list a[title]")
   links.each do |l|
+
     href = l['href'] + "maintenance.html"
     p href
-    driver.get(href)
+    begin
+      driver.get href
+      wait = Selenium::WebDriver::Wait.new(:timeout => 20)
+      link_href = l['href'][0,l['href'].length - 1]
+      p link_href
+      wait.until { driver.find_element(:css => "#carType[href='#{link_href}']")}
+    end
     next_page = Nokogiri::HTML(driver.page_source)
+    p next_page.at("#carType")
     #获取车款
-    car_type = next_page.at("#comtit strong a:first")
-
-    next unless car_type
+    car_type = next_page.at("#comtit strong a")
+    p car_type
     car_type_str = car_type.content
     p car_type.content
     p "------------------------------------------------"
@@ -70,11 +84,15 @@ car_lists.each do |c|
 
     #获取保养手册
     table = next_page.at(".tabel1")
-    open("export/#{title_str}-#{car_type_str}-#{year_str}-#{ver_str}.html", 'w:UTF-8') do |f|
-      f << '<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>'
-      f.puts table.to_s
-      f << "</body></html>"
+    begin
+      open("export/#{title_str}-#{car_type_str}-#{year_str}-#{ver_str}.html", 'w:UTF-8') do |f|
+        f << '<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>'
+        f.puts table.to_s
+        f << "</body></html>"
+      end
+    rescue
     end
   end
-end
+# end
 
+driver.quit
