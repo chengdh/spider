@@ -9,12 +9,12 @@ driver.get car_db_url
 #获取不同品牌
 brand_page =  Nokogiri::HTML(driver.page_source)
 car_lists = brand_page.css(".carList .name a")
+end_index = car_lists.length
 car_lists.each do |c|
   title_str = c['title']
   p c['title']
   p "------------------------------------------"
   car_maint_page_url = "http://db.auto.sohu.com/#{c['href']}"
-  #car_maint_page_url = "http://db.auto.sohu.com/model_3206/Maintenance.shtml"
   begin
     driver.get car_maint_page_url
   rescue
@@ -48,7 +48,6 @@ car_lists.each do |c|
   rescue
   end
 
-
   #获取所有车款
   links = m_car_maint_page.css(".top_list a[title]")
   links.each do |l|
@@ -72,20 +71,23 @@ car_lists.each do |c|
     p car_type.content
     p "------------------------------------------------"
     #获取年限
-    # year = next_page.at("#yearid .sel_tit:first")
-    # year_str = year["data-year"]
-    # p year["data-year"]
-    # p "------------------------------------------------"
+    year = next_page.at("#yearid .sel_tit")
+    next unless year
+    year_str = year["data-year"]
+    p year_str
+    p "------------------------------------------------"
     # #获取版本
-    # ver = next_page.at("#modelid .sel_tit:first")
-    # ver_str = ver.content
-    # p ver.content
-    # p "------------------------------------------------"
+    ver = next_page.at("#modelid .sel_tit")
+    next unless ver
+    ver_str = ver.content
+    p ver_str
+    p "------------------------------------------------"
 
     #获取保养手册
     table = next_page.at(".tabel1")
     begin
-      open("export/#{title_str}-#{car_type_str}.html", 'w:UTF-8') do |f|
+      # open("export/#{title_str}-#{car_type_str}.html", 'w:UTF-8') do |f|
+      open("export/#{title_str}-#{car_type_str}-#{year_str}-#{ver_str}.html", 'w:UTF-8') do |f|
         f << '<!DOCTYPE html><html><head><meta charset="utf-8" /></head><body>'
         f.puts table.to_s
         f << "</body></html>"
