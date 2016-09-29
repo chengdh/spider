@@ -8,7 +8,7 @@ car_db_url = "http://db.auto.sohu.com/maint_list.shtml"
 driver.get car_db_url
 #获取不同品牌
 brand_page =  Nokogiri::HTML(driver.page_source)
-car_lists = brand_page.css(".carList .name a")
+car_lists = brand_page.css(".boxA .carList .name a")
 end_index = car_lists.length
 car_lists.each do |c|
   title_str = c['title']
